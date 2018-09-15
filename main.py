@@ -1,5 +1,17 @@
 import pyb
+import time
 from pyb import Pin, Timer, ExtInt
+
+
+out_m1_cw = Pin('PA0', Pin.OUT_PP)
+out_m2_cw = Pin('PA1', Pin.OUT_PP)
+out_m3_cw = Pin('PA2', Pin.OUT_PP)
+out_m4_cw = Pin('PA3', Pin.OUT_PP)
+out_m5_cw = Pin('PA5', Pin.OUT_PP)
+out_m1_ccw = Pin('PB6', Pin.OUT_PP)
+out_m2_ccw = Pin('PB7', Pin.OUT_PP)
+out_m3_ccw = Pin('PB8', Pin.OUT_PP)
+out_m4_ccw = Pin('PB9', Pin.OUT_PP)
 
 
 in_btn_play 	= Pin('PB12', Pin.IN)
@@ -9,9 +21,6 @@ in_home_x 		= Pin('PC6', Pin.IN)
 in_home_y 		= Pin('PC7', Pin.IN)
 in_home_z 		= Pin('PB8', Pin.IN)
 
-out_pwm_x 		= Pin('PA3', Pin.OUT_PP)
-out_pwm_y 		= Pin('PA2', Pin.OUT_PP)
-out_pwm_z 		= Pin('PA1', Pin.OUT_PP)
 out_dir_x 		= Pin('PE1', Pin.OUT_PP)
 out_dir_y 		= Pin('PE2', Pin.OUT_PP)
 out_dir_z 		= Pin('PE3', Pin.OUT_PP)
@@ -19,55 +28,53 @@ out_enable_x	= Pin('PE4', Pin.OUT_PP)
 out_enable_y	= Pin('PE5', Pin.OUT_PP)
 out_enable_z	= Pin('PE6', Pin.OUT_PP)
 
-run_home_x 		= False
-run_home_y 		= False
-run_home_z 		= False
-home_x_ok 		= False
-home_y_ok 		= False
-home_z_ok 		= False
+
+vel_pct = 0
 
 
-
-def home_x():
-	out_enable_x.low()
-	out_dir_x.high()
-	pwm_ch_x = pwm_eje_x.channel(4, Timer.PWM, pin=out_pwm_x)
-	pwm_ch_x.pulse_width_percent(20)
-	print("Run Home X")
-
-def home_z():
-	pwm_ch_z = pwm_eje_z.channel(2, Timer.PWM, pin=out_pwm_z)
-	pwm_ch_z.pulse_width_percent(20)
-	print("Run Home Z")
-
-
-def irq_home_x(line):
-	global run_home_x, home_x_ok
+def update_vel(vel):
 	
-	if run_home_x:
-		pwm_eje_x.deinit()
-		run_home_x = False
-		home_x_ok = True
-		print("Home X OK")
+	vel_pct_cw = (abs(vel*-1)-(vel*-1))/2
+	vel_pct_ccw = (abs(vel)-vel)/2
 
-def irq_home_z(line):
-	global run_home_z, home_z_ok
-	
-	if run_home_z:
-		pwm_eje_z.deinit()
-		run_home_z = False
-		home_z_ok = True
-		print("Home Z OK")
+	pwm_m1_cw.pulse_width_percent(vel_pct_cw)
+	pwm_m1_ccw.pulse_width_percent(vel_pct_ccw)
+
+	print("Avance = %d Retorno = %d" %(vel_pct_cw, vel_pct_ccw))
 
 
-pwm_eje_z = Timer(2, freq=1000)
+
+
+
+#timer_2 = Timer(2, freq=1000)
+timer_4 = Timer(4, freq=1000)
+timer_5 = Timer(5, freq=1000)
+
+
+pwm_m1_cw = timer_5.channel(1, Timer.PWM, pin=out_m1_cw)
+pwm_m2_cw = timer_5.channel(2, Timer.PWM, pin=out_m2_cw)
+pwm_m3_cw = timer_5.channel(3, Timer.PWM, pin=out_m3_cw)
+pwm_m4_cw = timer_5.channel(4, Timer.PWM, pin=out_m4_cw)
+pwm_m1_ccw = timer_4.channel(1, Timer.PWM, pin=out_m1_ccw)
+pwm_m2_ccw = timer_4.channel(2, Timer.PWM, pin=out_m2_ccw)
+pwm_m3_ccw = timer_4.channel(3, Timer.PWM, pin=out_m3_ccw)
+pwm_m4_ccw = timer_4.channel(4, Timer.PWM, pin=out_m4_ccw)
 
 
 while True:
 
-	if not run_home_z:
-		run_home_z = True
-		home_z()
+	for vel_pct in range (0, 100):
+		update_vel(vel_pct)
+		#time.sleep_ms(100)
+		time.sleep(1)
 
+	for vel_pct in range (99, -100):
+		update_vel(vel_pct)
+		#time.sleep_ms(100)
+		time.sleep(1)
 
+	for vel_pct in range (-99, -1):
+		update_vel(vel_pct)
+		#time.sleep_ms(100)
+		time.sleep(1)
 
