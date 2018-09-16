@@ -2,6 +2,8 @@ import pyb
 import time
 from pyb import Pin, Timer, ExtInt
 
+#import motors
+
 
 out_m1_cw = Pin('PA0', Pin.OUT_PP)
 out_m2_cw = Pin('PA1', Pin.OUT_PP)
@@ -12,7 +14,6 @@ out_m1_ccw = Pin('PB6', Pin.OUT_PP)
 out_m2_ccw = Pin('PB7', Pin.OUT_PP)
 out_m3_ccw = Pin('PB8', Pin.OUT_PP)
 out_m4_ccw = Pin('PB9', Pin.OUT_PP)
-
 
 in_btn_play 	= Pin('PB12', Pin.IN)
 in_btn_home 	= Pin('PB13', Pin.IN)
@@ -30,9 +31,11 @@ out_enable_z	= Pin('PE6', Pin.OUT_PP)
 
 
 vel_pct = 0
+m1_lrv_pct_vel = 20.0
+m1_urv_pct_vel = 95.0
 
 
-def update_vel(vel):
+def move(vel):
 	
 	vel_pct_cw = (abs(vel*-1)-(vel*-1))/2
 	vel_pct_ccw = (abs(vel)-vel)/2
@@ -41,9 +44,6 @@ def update_vel(vel):
 	pwm_m1_ccw.pulse_width_percent(vel_pct_ccw)
 
 	print("Avance = %d Retorno = %d" %(vel_pct_cw, vel_pct_ccw))
-
-
-
 
 
 #timer_2 = Timer(2, freq=1000)
@@ -61,20 +61,26 @@ pwm_m3_ccw = timer_4.channel(3, Timer.PWM, pin=out_m3_ccw)
 pwm_m4_ccw = timer_4.channel(4, Timer.PWM, pin=out_m4_ccw)
 
 
+#motor_fl = Motor()	#Motor Front Left
+#motor_fl.update_config(m1_lrv_pct_vel, m1_urv_pct_vel)
+
+
+
 while True:
 
 	for vel_pct in range (0, 100):
-		update_vel(vel_pct)
+		move(vel_pct)
 		#time.sleep_ms(100)
 		time.sleep(1)
 
 	for vel_pct in range (99, -100):
-		update_vel(vel_pct)
+		move(vel_pct)
 		#time.sleep_ms(100)
 		time.sleep(1)
 
 	for vel_pct in range (-99, -1):
-		update_vel(vel_pct)
+		move(vel_pct)
 		#time.sleep_ms(100)
 		time.sleep(1)
+
 
