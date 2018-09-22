@@ -3,6 +3,7 @@
 
 import machine
 import pyb
-pyb.main('main_volvox.py') # main script to run after this one
+pyb.main('main_volvox.py') 
+
 #pyb.usb_mode('VCP+MSC') # act as a serial and a storage device
 #pyb.usb_mode('VCP+HID') # act as a serial device and a mouse
